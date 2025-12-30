@@ -4,6 +4,7 @@ loading and saving datasets from OpenML in compressed .npz format.
 import os
 import numpy as np
 import openml
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 os.environ.setdefault("OPENML_SKIP_PARQUET", "true")
 
@@ -23,20 +24,28 @@ def save_npz(did, X, y):
     filepath = os.path.join(cache_dir, f"dataset_{did}.npz")
     np.savez_compressed(filepath, X=X, y=y)
 
+def preprocess_dataset(X,preprocess='minmax'):
+    if preprocess == 'standard':
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+    else:
+        scaler = MinMaxScaler(feature_range=(0, 0.9999999))
+        X_scaled = scaler.fit_transform(X)
+    return X_scaled
 
 def dataset_already_saved(did):
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','data','raw'))
     filepath = os.path.join(cache_dir, f"dataset_{did}.npz")
     return os.path.exists(filepath)
 
-def load_dataset(did):
+def load_dataset(did,preprocess:"MinMax" | "Standard" | None=None):
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','data','raw'))
     if dataset_already_saved(did):
         filepath = os.path.join(cache_dir, f"dataset_{did}.npz")
         with np.load(filepath) as data:
             X = data['X']
             y = data['y']
-
+            X = preprocess_dataset(X,type=preprocess) if preprocess is not None else X
         return X, y
     dataset = openml.datasets.get_dataset(did)
     X, y, _, _ = dataset.get_data(
@@ -53,6 +62,7 @@ def load_dataset(did):
     y = _map_non_numeric_labels_to_numeric(y)
     y = y.astype(np.int64)
     save_npz(did, X, y)
+    X = preprocess_dataset(X)
 
     return X, y
 
