@@ -38,14 +38,14 @@ def dataset_already_saved(did):
     filepath = os.path.join(cache_dir, f"dataset_{did}.npz")
     return os.path.exists(filepath)
 
-def load_dataset(did,preprocess:"MinMax" | "Standard" | None=None):
+def load_dataset(did,preprocess=None):
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','data','raw'))
     if dataset_already_saved(did):
         filepath = os.path.join(cache_dir, f"dataset_{did}.npz")
         with np.load(filepath) as data:
             X = data['X']
             y = data['y']
-            X = preprocess_dataset(X,type=preprocess) if preprocess is not None else X
+            X = preprocess_dataset(X,preprocess=preprocess) if preprocess is not None else X
         return X, y
     dataset = openml.datasets.get_dataset(did)
     X, y, _, _ = dataset.get_data(

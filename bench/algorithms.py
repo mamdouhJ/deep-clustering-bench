@@ -1,3 +1,4 @@
+import numpy as np
 from clustpy.deep import IDEC, DDC, DeepECT, DipEncoder, VaDE
 from clustpy.deep.neural_networks import FeedforwardAutoencoder, VariationalAutoencoder 
 
@@ -8,7 +9,101 @@ ALGORITHMS = {"IDEC": IDEC,
               "DipEncoder": DipEncoder,
               "VaDE": VaDE}
 
-)
+def _build_autoencoder(nn_type: str,input_dim: int,arch: list,bottleneck_dim: int):
+        """
+        Helper function to build the appropriate autoencoder based on the specified type.
+        Parameters:
+        nn_type (str): Type of neural network ("ae" for Autoencoder, "vae" for Variational Autoencoder).
+        arch (list): List defining the architecture of the neural network.
+        Returns:
+        Autoencoder instance.
+        """
+        layres = [input_dim] + arch + [bottleneck_dim]
+        if nn_type == "ae":
+                autoencoder = FeedforwardAutoencoder(layres)
+        elif nn_type == "vae":
+                autoencoder = VariationalAutoencoder(layres)
+        else:
+                raise ValueError(f"Unsupported nn_type: {nn_type}. Choose either 'ae' or 'vae'.")
+        return autoencoder
+
+def _build_idec(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
+                nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
+                clustering_epochs: int, batch_size: int):
+        """
+        Helper function to build an IDEC instance with the specified configuration.
+        """
+        if nn_type != "ae":
+                raise ValueError("IDEC requires an Autoencoder (nn_type='ae').")
+        
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        idec = IDEC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
+                    clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
+                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder)
+        return idec
+
+def _build_vade(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
+                nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
+                clustering_epochs: int, batch_size: int):
+        """
+        Helper function to build a VaDE instance with the specified configuration.
+        """
+        if nn_type != "vae":
+                raise ValueError("VaDE requires a Variational Autoencoder (nn_type='vae').")
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        vade = VaDE(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
+                    clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
+                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,
+                        embedding_size=bottleneck_dim)
+        return vade
+
+def _build_ddc(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
+                nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
+                clustering_epochs: int, batch_size: int):
+        """
+        Helper function to build a DDC instance with the specified configuration.
+        """
+        if nn_type != "ae":
+                raise ValueError("DDC requires an Autoencoder (nn_type='ae').")
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        ddc = DDC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
+                pretrain_optimizer_params={"lr": pretrain_lr},neural_network=autoencoder)
+        return ddc
+
+def _build_ect(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
+                nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
+                clustering_epochs: int, batch_size: int):
+        """
+        Helper function to build a DeepECT instance with the specified configuration.
+        """
+        if nn_type != "ae":
+                raise ValueError("DeepECT requires an Autoencoder (nn_type='ae').")
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        deepect = DeepECT(max_n_leaf_nodes=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
+                    clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
+                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder)
+        return deepect
+
+def _build_dipencoder(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
+                nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
+                clustering_epochs: int, batch_size: int):
+        """
+        Helper function to build a DipEncoder instance with the specified configuration.
+        """
+        if nn_type != "ae":
+                raise ValueError("DipEncoder requires an Autoencoder (nn_type='ae').")
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        dipencoder = DipEncoder(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
+                    clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
+                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder
+                        ,embedding_size=bottleneck_dim)
+        return dipencoder
+
+BUILDERS = {"IDEC": _build_idec,
+                "DDC": _build_ddc,
+                "DeepECT": _build_ect,
+                "DipEncoder": _build_dipencoder,
+                "VaDE": _build_vade}
 
 class DeepClusteringAlgorithm:
         """
@@ -36,6 +131,54 @@ class DeepClusteringAlgorithm:
                         
         """
 
-        def __init__(self, config, random_state=None):
-                self.config = config    
+        def __init__(self, config):
+                self.config = config   
+                self.init_algorithm()
+        
+
+        def init_algorithm(self):
+                self.algo_name = self.config["algo"]
+                if self.algo_name not in ALGORITHMS:
+                        raise ValueError(f"Unsupported algorithm: {self.algo_name}. Choose from {list(ALGORITHMS.keys())}.")
+                self.model = BUILDERS[self.algo_name](
+                        n_clusters=self.config["data"]["n_clusters"],
+                        input_dim=self.config["data"]["input_dim"],
+                        arch=self.config["arch"],
+                        bottleneck_dim=self.config.get("bottleneck_dim", 10),
+                        nn_type=self.config["nn_type"],
+                        pretrain_lr=self.config["pretrain"]["lr"],
+                        pretrain_epochs=self.config["pretrain"]["epochs"],
+                        clustering_lr=self.config["clustering"]["lr"],
+                        clustering_epochs=self.config["clustering"]["epochs"],
+                        batch_size=self.config["batch_size"]
+                )
                 
+        def fit(self, data: np.ndarray, val_set: np.ndarray=None):
+                """
+                Fit the deep clustering model to the data.
+                Parameters:
+                data (np.ndarray): Input data for clustering.
+                val_set (np.ndarray, optional): Validation set for early stopping. Defaults to None.
+                """
+                self.model.fit(data, val_set=val_set)
+                return self.model
+        
+        def predict(self, data: np.ndarray):
+                """
+                Predict cluster labels for the input data.
+                Parameters:
+                data (np.ndarray): Input data for clustering.
+                """
+                return self.model.predict(data)
+        
+        def transform(self, data: np.ndarray):
+                """
+                Transform the input data to the latent space.
+                Parameters:
+                data (np.ndarray): Input data to transform.
+                """
+                return self.model.transform(data)
+        
+
+
+        
