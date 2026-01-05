@@ -1,0 +1,1 @@
+ALGOS = ['IDEC', 'DDC', 'DeepECT', 'DipEncoder', 'VaDE']

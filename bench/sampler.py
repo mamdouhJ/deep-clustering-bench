@@ -1,10 +1,16 @@
 from __future__ import annotations
+import os
+from pathlib import Path
 import hashlib
 import numpy as np
-
+from utils import save_configs_jsonl
+from globals import ALGOS
 from config_schema import DCConfig, DataConfig, PhaseConfig, TrainConfig, ModelConfig, validate
 from search_space import LR_GRID, BATCH_SIZE_GRID, BOTTLE_NECK_GRID, NUMBER_OF_LAYERS_GRID, LAYERS_GRID, EARLY_STOPPING_OPTIONS, ALGO_SPECS
+from datasets import get_dataset_metadata, load_dataset, get_ids_from_txt
 
+HERE = Path(__file__).resolve().parent        
+ROOT = HERE.parent                            
 
 def get_seed(did: int, algo: str,config_number: int) -> int:
     """
@@ -18,7 +24,6 @@ def get_seed(did: int, algo: str,config_number: int) -> int:
     seed_str = f"{did}_{algo}_{config_number}"
     seed_hash = hashlib.md5(seed_str.encode()).hexdigest()
     seed = int(seed_hash, 16) % (2**16)  # Limit to 16-bit integer
-    print(seed)
     return seed
 
 def get_epochs(    
@@ -59,25 +64,25 @@ def sample_one_config(
         did=did,
     )
     
-    pretrain_lr = rng.choice(LR_GRID)
-    clustering_lr = rng.choice(LR_GRID)
+    pretrain_lr = float(rng.choice(LR_GRID))
+    clustering_lr = float(rng.choice(LR_GRID))
     pretrain = PhaseConfig(
         lr=pretrain_lr,
-        epochs=get_epochs(pretrain_lr,default_epochs= 100,lr_ref = 1e-3),
+        epochs=float(get_epochs(pretrain_lr,default_epochs= 100,lr_ref = 1e-3)),
     )
     clustering = PhaseConfig(
         lr=clustering_lr,
-        epochs=get_epochs(clustering_lr,default_epochs= 150,lr_ref = 1e-4),
+        epochs=float(get_epochs(clustering_lr,default_epochs= 150,lr_ref = 1e-4)),
     )
     train = TrainConfig(
-        batch_size=rng.choice(_valid_batches(n_train)),
+        batch_size=int(rng.choice(_valid_batches(n_train))),
         early_stopping=rng.choice(EARLY_STOPPING_OPTIONS),
     )
-    arch_layers = rng.choice(NUMBER_OF_LAYERS_GRID)
-    arch = [rng.choice(LAYERS_GRID) for _ in range(arch_layers)]
+    arch_layers = int(rng.choice(NUMBER_OF_LAYERS_GRID))
+    arch = [int(rng.choice(LAYERS_GRID)) for _ in range(arch_layers)]
     model = ModelConfig(
-        arch=tuple(arch),
-        bottleneck_dim=rng.choice(BOTTLE_NECK_GRID),
+        arch=list(arch),
+        bottleneck_dim=int(rng.choice(BOTTLE_NECK_GRID)),
         nn_type=ALGO_SPECS[algo],
     )
     config = DCConfig(
@@ -122,23 +127,58 @@ def sample_for_pair(
     return configs
 
 if __name__ == "__main__":
-    # Example usage
-    did = 12345
-    algo = "IDEC"
-    input_dim = 100
-    n_clusters = 10
-    n_train = 5000
-    n_configs = 10
+    small_ids_path = ROOT / "small_ids.txt"
+    normal_ids_path = ROOT / "normal_ids.txt"
+    big_ids_path = ROOT / "big_ids.txt"
 
-    sampled_configs = sample_for_pair(
-        did=did,
-        algo=algo,
-        input_dim=input_dim,
-        n_clusters=n_clusters,
-        n_train=n_train,
-        n_configs=n_configs,
-    )
+    small_ids = get_ids_from_txt(small_ids_path)
+    normal_ids = get_ids_from_txt(normal_ids_path)
+    big_ids = get_ids_from_txt(big_ids_path)
 
-    for i, config in enumerate(sampled_configs):
-        print(f"Config {i+1}:\n{config.to_dict()}\n")
+    for did in small_ids:
+        metadata = get_dataset_metadata(did)
+        for algo in ALGOS:
+            configs = sample_for_pair(
+                did=did,
+                algo=algo,
+                input_dim=metadata["n_features"],
+                n_clusters=metadata["n_classes"],
+                n_train=metadata["n_samples"],
+                n_configs=200,
+            )
+            os.makedirs(f"./configs/small/{did}", exist_ok=True)
+            os.makedirs(f"./configs/small/{did}/{algo}", exist_ok=True)
+            save_configs_jsonl(configs, f"./configs/small/{did}/{algo}/configs.jsonl")
+
+    for did in normal_ids:
+        metadata = get_dataset_metadata(did)
+        for algo in ALGOS:
+            configs = sample_for_pair(
+                did=did,
+                algo=algo,
+                input_dim=metadata["n_features"],
+                n_clusters=metadata["n_classes"],
+                n_train=metadata["n_samples"],
+                n_configs=100,
+            )
+            os.makedirs(f"./configs/normal/{did}", exist_ok=True)
+            os.makedirs(f"./configs/normal/{did}/{algo}", exist_ok=True)
+            save_configs_jsonl(configs, f"./configs/normal/{did}/{algo}/configs.jsonl")
+
+    for did in big_ids:
+        metadata = get_dataset_metadata(did)
+        for algo in ALGOS:
+            configs = sample_for_pair(
+                did=did,
+                algo=algo,
+                input_dim=metadata["n_features"],
+                n_clusters=metadata["n_classes"],
+                n_train=metadata["n_samples"],
+                n_configs=50,
+            )
+            os.makedirs(f"./configs/big/{did}", exist_ok=True)
+            os.makedirs(f"./configs/big/{did}/{algo}", exist_ok=True)
+            save_configs_jsonl(configs, f"./configs/big/{did}/{algo}/configs.jsonl")
+
+
     

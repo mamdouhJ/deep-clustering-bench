@@ -66,4 +66,19 @@ def load_dataset(did,preprocess=None):
 
     return X, y
 
+def get_dataset_metadata(did):
+    X, y = load_dataset(did)
+    n_samples, n_features = X.shape
+    n_classes = len(np.unique(y))
+    return {
+        "n_samples": n_samples,
+        "n_features": n_features,
+        "n_classes": n_classes,
+    }
+
+def get_ids_from_txt(filepath):
+    with open(filepath, "r") as f:
+        ids = [int(line.strip()) for line in f if line.strip().isdigit()]
+    return ids
+
 
