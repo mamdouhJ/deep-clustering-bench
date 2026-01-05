@@ -29,7 +29,7 @@ def _build_autoencoder(nn_type: str,input_dim: int,arch: list,bottleneck_dim: in
 
 def _build_idec(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
                 nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
-                clustering_epochs: int, batch_size: int):
+                clustering_epochs: int, batch_size: int,seed: int):
         """
         Helper function to build an IDEC instance with the specified configuration.
         """
@@ -39,12 +39,12 @@ def _build_idec(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int
         autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
         idec = IDEC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
-                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder)
+                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
         return idec
 
 def _build_vade(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
                 nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
-                clustering_epochs: int, batch_size: int):
+                clustering_epochs: int, batch_size: int,seed: int):
         """
         Helper function to build a VaDE instance with the specified configuration.
         """
@@ -54,12 +54,12 @@ def _build_vade(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int
         vade = VaDE(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,
-                        embedding_size=bottleneck_dim)
+                        embedding_size=bottleneck_dim,random_state=seed)
         return vade
 
 def _build_ddc(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
                 nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
-                clustering_epochs: int, batch_size: int):
+                clustering_epochs: int, batch_size: int,seed: int):
         """
         Helper function to build a DDC instance with the specified configuration.
         """
@@ -67,12 +67,12 @@ def _build_ddc(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
                 raise ValueError("DDC requires an Autoencoder (nn_type='ae').")
         autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
         ddc = DDC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
-                pretrain_optimizer_params={"lr": pretrain_lr},neural_network=autoencoder)
+                pretrain_optimizer_params={"lr": pretrain_lr},neural_network=autoencoder,random_state=seed)
         return ddc
 
 def _build_ect(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
                 nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
-                clustering_epochs: int, batch_size: int):
+                clustering_epochs: int, batch_size: int,seed: int):
         """
         Helper function to build a DeepECT instance with the specified configuration.
         """
@@ -81,12 +81,12 @@ def _build_ect(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
         autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
         deepect = DeepECT(max_n_leaf_nodes=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
-                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder)
+                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
         return deepect
 
 def _build_dipencoder(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
                 nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
-                clustering_epochs: int, batch_size: int):
+                clustering_epochs: int, batch_size: int,seed: int):
         """
         Helper function to build a DipEncoder instance with the specified configuration.
         """
@@ -96,7 +96,7 @@ def _build_dipencoder(n_clusters: int, input_dim: int, arch: list, bottleneck_di
         dipencoder = DipEncoder(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder
-                        ,embedding_size=bottleneck_dim)
+                        ,embedding_size=bottleneck_dim,random_state=seed)
         return dipencoder
 
 BUILDERS = {"IDEC": _build_idec,
@@ -150,7 +150,8 @@ class DeepClusteringAlgorithm:
                         pretrain_epochs=self.config["pretrain"]["epochs"],
                         clustering_lr=self.config["clustering"]["lr"],
                         clustering_epochs=self.config["clustering"]["epochs"],
-                        batch_size=self.config["batch_size"]
+                        batch_size=self.config["batch_size"],
+                        seed = self.config["seed"]
                 )
                 
         def fit(self, data: np.ndarray, val_set: np.ndarray=None):
