@@ -1,6 +1,8 @@
 import numpy as np
+from sklearn.metrics import silhouette_score, davies_bouldin_score, adjusted_rand_score, normalized_mutual_info_score
 from clustpy.deep import IDEC, DDC, DeepECT, DipEncoder, VaDE
 from clustpy.deep.neural_networks import FeedforwardAutoencoder, VariationalAutoencoder 
+from clustpy.metrics import unsupervised_clustering_accuracy as uca
 
 
 ALGORITHMS = {"IDEC": IDEC,
@@ -40,6 +42,7 @@ def _build_idec(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int
         idec = IDEC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
+        print(f"The seed for IDEC is: {seed}")
         return idec
 
 def _build_vade(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
@@ -133,7 +136,9 @@ class DeepClusteringAlgorithm:
 
         def __init__(self, config):
                 self.config = config   
+                self.transformed_data = None
                 self.init_algorithm()
+                self.fitted = False
         
 
         def init_algorithm(self):
@@ -147,9 +152,9 @@ class DeepClusteringAlgorithm:
                         bottleneck_dim=self.config.get("bottleneck_dim", 10),
                         nn_type=self.config["nn_type"],
                         pretrain_lr=self.config["pretrain"]["lr"],
-                        pretrain_epochs=self.config["pretrain"]["epochs"],
+                        pretrain_epochs=int(self.config["pretrain"]["epochs"]),
                         clustering_lr=self.config["clustering"]["lr"],
-                        clustering_epochs=self.config["clustering"]["epochs"],
+                        clustering_epochs=int(self.config["clustering"]["epochs"]),
                         batch_size=self.config["batch_size"],
                         seed = self.config["seed"]
                 )
@@ -162,6 +167,7 @@ class DeepClusteringAlgorithm:
                 val_set (np.ndarray, optional): Validation set for early stopping. Defaults to None.
                 """
                 self.model.fit(data, val_set=val_set)
+                self.fitted = True
                 return self.model
         
         def predict(self, data: np.ndarray):
@@ -179,6 +185,30 @@ class DeepClusteringAlgorithm:
                 data (np.ndarray): Input data to transform.
                 """
                 return self.model.transform(data)
+        
+        def get_metrics(self,groundtruth: np.ndarray, data: np.ndarray) -> dict:
+                """
+                Get the clustering metrics based on the ground truth labels.
+                Parameters:
+                groundtruth (np.ndarray): Ground truth labels for the data.
+                Returns:
+                dict: Dictionary containing clustering metrics. ("ARI", "NMI", "UCA", "Silhouette", "Davies-Bouldin")
+
+                """
+                if not self.fitted:
+                        raise RuntimeError("Model must be fitted before calculating metrics.")
+                embs = self.transform(data)
+                predicted_labels = self.predict(data)
+                if len(self.model.labels_) == len(predicted_labels):
+                        predicted_labels = self.model.labels_
+                metrics = {
+                        "ARI": adjusted_rand_score(groundtruth, predicted_labels),
+                        "NMI": normalized_mutual_info_score(groundtruth, predicted_labels),
+                        "UCA": uca(groundtruth, predicted_labels),
+                        "Silhouette": silhouette_score(embs, predicted_labels),
+                        "Davies-Bouldin": davies_bouldin_score(embs, predicted_labels)
+                }
+                return metrics
         
 
 

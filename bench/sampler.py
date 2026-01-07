@@ -31,7 +31,7 @@ def get_epochs(
     *,
     default_epochs: int = 100,
     lr_ref: float = 1e-3,
-    C: float = 0.5,
+    C: float = 0.8,
     min_epochs: int = 100,
     max_epochs: int = 3000,
 ) -> int:
@@ -146,9 +146,9 @@ if __name__ == "__main__":
                 n_train=metadata["n_samples"],
                 n_configs=200,
             )
-            os.makedirs(f"./configs/small/{did}", exist_ok=True)
-            os.makedirs(f"./configs/small/{did}/{algo}", exist_ok=True)
-            save_configs_jsonl(configs, f"./configs/small/{did}/{algo}/configs.jsonl")
+            os.makedirs(f"./configs/{did}", exist_ok=True)
+            os.makedirs(f"./configs/{did}/{algo}", exist_ok=True)
+            save_configs_jsonl(configs, f"./configs/{did}/{algo}/configs.jsonl")
 
     for did in normal_ids:
         metadata = get_dataset_metadata(did)
@@ -161,9 +161,9 @@ if __name__ == "__main__":
                 n_train=metadata["n_samples"],
                 n_configs=100,
             )
-            os.makedirs(f"./configs/normal/{did}", exist_ok=True)
-            os.makedirs(f"./configs/normal/{did}/{algo}", exist_ok=True)
-            save_configs_jsonl(configs, f"./configs/normal/{did}/{algo}/configs.jsonl")
+            os.makedirs(f"./configs/{did}", exist_ok=True)
+            os.makedirs(f"./configs/{did}/{algo}", exist_ok=True)
+            save_configs_jsonl(configs, f"./configs/{did}/{algo}/configs.jsonl")
 
     for did in big_ids:
         metadata = get_dataset_metadata(did)
@@ -176,9 +176,9 @@ if __name__ == "__main__":
                 n_train=metadata["n_samples"],
                 n_configs=50,
             )
-            os.makedirs(f"./configs/big/{did}", exist_ok=True)
-            os.makedirs(f"./configs/big/{did}/{algo}", exist_ok=True)
-            save_configs_jsonl(configs, f"./configs/big/{did}/{algo}/configs.jsonl")
+            os.makedirs(f"./configs/{did}", exist_ok=True)
+            os.makedirs(f"./configs/{did}/{algo}", exist_ok=True)
+            save_configs_jsonl(configs, f"./configs/{did}/{algo}/configs.jsonl")
 
 
     
