@@ -8,18 +8,21 @@ from algorithms import DeepClusteringAlgorithm
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-"""
-parser = argparse.ArgumentParser(description="Given dataset ID, algorithm name, and config number, run the deep clustering algorithm on the dataset.")
-parser.add_argument("--did", type=int, required=True, help="Dataset ID (OpenML ID)")
-parser.add_argument("--algo", type=str, required=True, choices=['DDC', 'IDEC', 'DipEncoder', 'VaDE', 'DCN'], help="Algorithm name (choose from: 'DDC', 'IDEC', 'DipEncoder', 'VaDE', 'DCN')")
-parser.add_argument("--config_number", type=int, required=True, help="Configuration number (line number in the config file)")
-args = parser.parse_args()
+
 """
 args = argparse.Namespace()
 args.did = 36
 args.algo = "IDEC"
 args.config_number = 0
 args.num_runs = 5
+"""
+parser = argparse.ArgumentParser(description="Given dataset ID, algorithm name, and config number, run the deep clustering algorithm on the dataset.")
+parser.add_argument("--did", type=int, required=True, help="Dataset ID (OpenML ID)")
+parser.add_argument("--algo", type=str, required=True, choices=['DDC', 'IDEC', 'DipEncoder', 'VaDE', 'DCN'], help="Algorithm name (choose from: 'DDC', 'IDEC', 'DipEncoder', 'VaDE', 'DCN')")
+parser.add_argument("--config_number", type=int, required=True, help="Configuration number (line number in the config file)")
+args = parser.parse_args()
+
+
 config_file = get_config_file_from_number(args.did, args.algo, args.config_number)
 print(config_file)
 run_id = config_file["run_id"]

@@ -11,20 +11,24 @@ ALGORITHMS = {"IDEC": IDEC,
               "DipEncoder": DipEncoder,
               "VaDE": VaDE}
 
-def _build_autoencoder(nn_type: str,input_dim: int,arch: list,bottleneck_dim: int):
+def _build_autoencoder(nn_type: str,input_dim: int,arch: list,bottleneck_dim: int,random_state: int):
         """
         Helper function to build the appropriate autoencoder based on the specified type.
         Parameters:
         nn_type (str): Type of neural network ("ae" for Autoencoder, "vae" for Variational Autoencoder).
         arch (list): List defining the architecture of the neural network.
+        input_dim (int): Dimensionality of the input data.
+        bottleneck_dim (int): Dimensionality of the bottleneck layer.
+        random_state (int): Random seed for reproducibility.
         Returns:
         Autoencoder instance.
         """
         layres = [input_dim] + arch + [bottleneck_dim]
         if nn_type == "ae":
-                autoencoder = FeedforwardAutoencoder(layres)
+                autoencoder = FeedforwardAutoencoder(layres,random_state=random_state)
+                print(f"The seed for Autoencoder is: {random_state}")
         elif nn_type == "vae":
-                autoencoder = VariationalAutoencoder(layres)
+                autoencoder = VariationalAutoencoder(layres,random_state=random_state)
         else:
                 raise ValueError(f"Unsupported nn_type: {nn_type}. Choose either 'ae' or 'vae'.")
         return autoencoder
@@ -38,7 +42,7 @@ def _build_idec(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int
         if nn_type != "ae":
                 raise ValueError("IDEC requires an Autoencoder (nn_type='ae').")
         
-        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         idec = IDEC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
@@ -53,7 +57,7 @@ def _build_vade(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int
         """
         if nn_type != "vae":
                 raise ValueError("VaDE requires a Variational Autoencoder (nn_type='vae').")
-        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         vade = VaDE(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,
@@ -68,7 +72,7 @@ def _build_ddc(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
         """
         if nn_type != "ae":
                 raise ValueError("DDC requires an Autoencoder (nn_type='ae').")
-        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         ddc = DDC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                 pretrain_optimizer_params={"lr": pretrain_lr},neural_network=autoencoder,random_state=seed)
         return ddc
@@ -81,7 +85,7 @@ def _build_ect(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
         """
         if nn_type != "ae":
                 raise ValueError("DeepECT requires an Autoencoder (nn_type='ae').")
-        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         deepect = DeepECT(max_n_leaf_nodes=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
@@ -95,7 +99,7 @@ def _build_dipencoder(n_clusters: int, input_dim: int, arch: list, bottleneck_di
         """
         if nn_type != "ae":
                 raise ValueError("DipEncoder requires an Autoencoder (nn_type='ae').")
-        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim)
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         dipencoder = DipEncoder(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder

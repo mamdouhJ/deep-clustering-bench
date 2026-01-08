@@ -159,7 +159,7 @@ if __name__ == "__main__":
                 input_dim=metadata["n_features"],
                 n_clusters=metadata["n_classes"],
                 n_train=metadata["n_samples"],
-                n_configs=100,
+                n_configs=200,
             )
             os.makedirs(f"./configs/{did}", exist_ok=True)
             os.makedirs(f"./configs/{did}/{algo}", exist_ok=True)
@@ -174,7 +174,7 @@ if __name__ == "__main__":
                 input_dim=metadata["n_features"],
                 n_clusters=metadata["n_classes"],
                 n_train=metadata["n_samples"],
-                n_configs=50,
+                n_configs=200,
             )
             os.makedirs(f"./configs/{did}", exist_ok=True)
             os.makedirs(f"./configs/{did}/{algo}", exist_ok=True)
