@@ -20,6 +20,7 @@ parser = argparse.ArgumentParser(description="Given dataset ID, algorithm name, 
 parser.add_argument("--did", type=int, required=True, help="Dataset ID (OpenML ID)")
 parser.add_argument("--algo", type=str, required=True, choices=['DDC', 'IDEC', 'DipEncoder', 'VaDE', 'DCN'], help="Algorithm name (choose from: 'DDC', 'IDEC', 'DipEncoder', 'VaDE', 'DCN')")
 parser.add_argument("--config_number", type=int, required=True, help="Configuration number (line number in the config file)")
+parser.add_argument("--num_runs", type=int, default=5, help="Number of runs to execute with different seeds")
 args = parser.parse_args()
 
 

@@ -31,9 +31,9 @@ def get_epochs(
     *,
     default_epochs: int = 100,
     lr_ref: float = 1e-3,
-    C: float = 0.8,
+    C: float = 0.6,
     min_epochs: int = 100,
-    max_epochs: int = 3000,
+    max_epochs: int = 2000,
 ) -> int:
     """
     Map learning rate -> number of epochs.
