@@ -1,6 +1,8 @@
 import os 
 import time
 import argparse
+import atexit
+
 from pathlib import Path
 from datasets import load_dataset
 from utils import get_config_file_from_number, split_indices, save_results_jsonl
@@ -26,12 +28,21 @@ args = parser.parse_args()
 
 config_file = get_config_file_from_number(args.did, args.algo, args.config_number)
 print(config_file)
+
 run_id = config_file["run_id"]
 config = config_file["config"]
 seed = config["seed"]
 t0 = time.time()
 X, y = load_dataset(args.did)
 results_list = []
+results_dir = ROOT / "results" / str(args.did) / args.algo
+results_path = results_dir / f"result_{run_id}.jsonl"
+
+if results_path.exists():
+    print(f"[ABORT] Results already exist: {results_path}")
+    raise SystemExit(0)
+
+
 for i in range(args.num_runs):
     config['seed'] = config['seed'] + 1
     print(f"The config for run {i+1} is: {config}")
@@ -50,11 +61,11 @@ for i in range(args.num_runs):
         "did": args.did,
         "algo": args.algo,
         "config_number": args.config_number,
-        "seed": seed,
+        "seed": config['seed'],
         "metrics": metrics,
         "time_taken": time.time() - t0,
     }
     results_list.append(results_config)
-    os.makedirs(ROOT / "results" / str(args.did) / args.algo, exist_ok=True)
-    save_results_jsonl(results_list, ROOT / "results" / str(args.did) / args.algo / f"result_{run_id}.jsonl")
+os.makedirs(ROOT / "results" / str(args.did) / args.algo, exist_ok=True)
+save_results_jsonl(results_list, ROOT / "results" / str(args.did) / args.algo / f"result_{run_id}.jsonl")
 
