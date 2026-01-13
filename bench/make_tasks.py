@@ -1,6 +1,7 @@
-
 import json
+import argparse
 from pathlib import Path
+import numpy as np
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -11,37 +12,38 @@ def count_lines(p: Path) -> int:
     with p.open("r") as f:
         return sum(1 for _ in f)
 
-def main():
+def main(seed: int = 0):
     out_path = ROOT / "tasks" / "tasks.jsonl"
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    n_tasks = 0
-    with out_path.open("w") as out:
-        configs_root = ROOT / "configs"
+    tasks = []
+    configs_root = ROOT / "configs"
 
-        for did_dir in configs_root.iterdir():
-            if not did_dir.is_dir():
+    for did_dir in configs_root.iterdir():
+        if not did_dir.is_dir():
+            continue
+        did = int(did_dir.name)
+
+        for algo in ALGOS:
+            cfg_path = did_dir / algo / "configs.jsonl"
+            if not cfg_path.exists():
                 continue
 
-            did = int(did_dir.name)
+            n_cfgs = count_lines(cfg_path)
+            for config_number in range(n_cfgs):
+                tasks.append({"did": did, "algo": algo, "config_number": config_number})
 
-            for algo in ALGOS:
-                cfg_path = did_dir / algo / "configs.jsonl"
-                if not cfg_path.exists():
-                    continue
+    rng = np.random.default_rng(seed)
+    rng.shuffle(tasks)
 
-                n_cfgs = count_lines(cfg_path)
-                if n_cfgs != 200:
-                    print(f"Warning: Expected 200 configs for did={did}, algo={algo}, but found {n_cfgs}")
-                for config_number in range(n_cfgs):
-                    out.write(json.dumps({
-                        "did": did,
-                        "algo": algo,
-                        "config_number": config_number,
-                    }) + "\n")
-                    n_tasks += 1
+    with out_path.open("w") as out:
+        for t in tasks:
+            out.write(json.dumps(t) + "\n")
 
-    print(f"Wrote {n_tasks} tasks to {out_path}")
+    print(f"Wrote {len(tasks)} shuffled tasks to {out_path} (seed={seed})")
 
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seed", type=int, default=0)
+    args = ap.parse_args()
+    main(seed=args.seed)

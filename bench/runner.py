@@ -21,7 +21,7 @@ def main():
         "--algo",
         type=str,
         required=True,
-        choices=["DDC", "IDEC", "DipEncoder", "VaDE", "DCN"],
+        choices=["DDC", "IDEC", "DipEncoder", "VaDE", "DeepECT"],
         help="Algorithm name",
     )
     parser.add_argument("--config_number", type=int, required=True, help="Configuration number (line number in the config file)")
