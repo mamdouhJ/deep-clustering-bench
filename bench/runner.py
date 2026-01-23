@@ -105,12 +105,12 @@ def main():
                 "time_taken": time.time() - t0,
             })
             #artifacts_list.append(model.get_artifacts())
-            sav
+            save_results_npz(model.get_artifacts(), results_dir / f"artifacts_{run_id}_run{i+1}.npz")
 
         # Write once at the end
         save_results_jsonl(results_list, results_path)
         print(f"[OK] Wrote results: {results_path}")
-        save_results_npz(artifacts_list, results_dir / f"artifacts_{run_id}.npz")
+        save_results_npz(model.get_artifacts(), results_dir / f"artifacts_{run_id}.npz")
     finally:
         _cleanup_lock()
 
