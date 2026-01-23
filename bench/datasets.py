@@ -38,7 +38,7 @@ def dataset_already_saved(did):
     filepath = os.path.join(cache_dir, f"dataset_{did}.npz")
     return os.path.exists(filepath)
 
-def load_dataset(did,preprocess=None):
+def load_dataset(did,preprocess="minmax"):
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','data','raw'))
     if dataset_already_saved(did):
         filepath = os.path.join(cache_dir, f"dataset_{did}.npz")

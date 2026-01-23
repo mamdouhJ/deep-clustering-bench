@@ -49,6 +49,11 @@ def save_results_jsonl(results: list[dict], out_path: str) -> None:
         for result in results:
             f.write(json.dumps(result) + "\n")
 
+def save_results_npz(results: dict, out_path: str) -> None:
+    path = Path(out_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(path, **results)
+
 if __name__ == "__main__":
     # Example usage
     did = 36

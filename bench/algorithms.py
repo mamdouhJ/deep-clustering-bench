@@ -190,6 +190,18 @@ class DeepClusteringAlgorithm:
                 """
                 return self.model.transform(data)
         
+        def get_labels(self,data: np.ndarray) -> np.ndarray:
+                """
+                Get the cluster labels assigned by the model.
+                Returns:
+                np.ndarray: Cluster labels.
+                """
+                if not self.fitted:
+                        raise RuntimeError("Model must be fitted before getting labels.")
+                if data.shape[0] != self.model.labels_.shape[0]:
+                        return self.predict(data)
+                return self.model.labels_
+
         def get_metrics(self,groundtruth: np.ndarray, data: np.ndarray) -> dict:
                 """
                 Get the clustering metrics based on the ground truth labels.
@@ -213,7 +225,20 @@ class DeepClusteringAlgorithm:
                         "Davies-Bouldin": davies_bouldin_score(embs, predicted_labels)
                 }
                 return metrics
-        
 
-
-        
+        def get_artifacts(self) -> dict:
+                """
+                Get the artifacts produced by the model.
+                Returns:
+                dict: Dictionary containing model artifacts. ("pseudo labels", "loss history")
+                """
+                if not self.fitted:
+                        raise RuntimeError("Model must be fitted before getting artifacts.")
+                artifacts = {
+                        "pseudo labels": self.model.labels_
+                        
+                }
+                #loop over all keys in model.history and add them to artifacts
+                for key in self.model.history_.keys():
+                        artifacts[key] = self.model.history_[key]
+                return artifacts

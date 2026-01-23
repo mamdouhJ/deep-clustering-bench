@@ -1,11 +1,12 @@
 import os
 import time
+import numpy as np
 import argparse
 import atexit
 from pathlib import Path
 
 from datasets import load_dataset
-from utils import get_config_file_from_number, split_indices, save_results_jsonl
+from utils import get_config_file_from_number, split_indices, save_results_jsonl, save_results_npz
 from algorithms import DeepClusteringAlgorithm
 
 HERE = Path(__file__).resolve().parent
@@ -67,9 +68,11 @@ def main():
     # 3) Run
     t0 = time.time()
     results_list = []
-
+    artifacts_list = [] 
     try:
         X, y = load_dataset(args.did)
+        print(f"[LOAD] Loaded dataset did={args.did} with X.shape={X.shape} y.shape={y.shape}")
+        print(f"The uniqure labels are: {np.unique(y)}")
 
         base_seed = int(config["seed"])  # original seed from config
 
@@ -87,9 +90,11 @@ def main():
                 model.fit(X[train_idx], val_set=X[val_idx])
             else:
                 model.fit(X)
-
+            print(f"the unique pseudo-labels are: {np.unique(model.model.labels_)}")
+            print(f"The shape of the pseudo labels is: {model.model.labels_.shape}")
+            print(model.model.labels_)
             metrics = model.get_metrics(y, X)
-
+            
             results_list.append({
                 "run_id": run_id,
                 "did": args.did,
@@ -99,11 +104,13 @@ def main():
                 "metrics": metrics,
                 "time_taken": time.time() - t0,
             })
+            #artifacts_list.append(model.get_artifacts())
+            sav
 
         # Write once at the end
         save_results_jsonl(results_list, results_path)
         print(f"[OK] Wrote results: {results_path}")
-
+        save_results_npz(artifacts_list, results_dir / f"artifacts_{run_id}.npz")
     finally:
         _cleanup_lock()
 
