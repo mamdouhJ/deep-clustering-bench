@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics import silhouette_score, davies_bouldin_score, adjusted_rand_score, normalized_mutual_info_score
-from clustpy.deep import IDEC, DDC, DeepECT, DipEncoder, VaDE
+from clustpy.deep import IDEC, DDC, DeepECT, DipEncoder, VaDE, DKM
 from clustpy.deep.neural_networks import FeedforwardAutoencoder, VariationalAutoencoder 
 from clustpy.metrics import unsupervised_clustering_accuracy as uca
 
@@ -9,7 +9,8 @@ ALGORITHMS = {"IDEC": IDEC,
               "DDC": DDC,
               "DeepECT": DeepECT,
               "DipEncoder": DipEncoder,
-              "VaDE": VaDE}
+             # "VaDE": VaDE,
+              "DKM": DKM}
 
 def _build_autoencoder(nn_type: str,input_dim: int,arch: list,bottleneck_dim: int,random_state: int):
         """
@@ -48,6 +49,20 @@ def _build_idec(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
         print(f"The seed for IDEC is: {seed}")
         return idec
+
+def _build_dkm(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
+                nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
+                clustering_epochs: int, batch_size: int,seed: int):
+        """
+        Helper function to build a DKM instance with the specified configuration.
+        """
+        if nn_type != "ae":
+                raise ValueError("DKM requires an Autoencoder (nn_type='ae').")
+        autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
+        dkm = DKM(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
+                    clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
+                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
+        return dkm
 
 def _build_vade(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
                 nn_type: str, pretrain_lr: float, pretrain_epochs: int, clustering_lr: float,
@@ -110,7 +125,8 @@ BUILDERS = {"IDEC": _build_idec,
                 "DDC": _build_ddc,
                 "DeepECT": _build_ect,
                 "DipEncoder": _build_dipencoder,
-                "VaDE": _build_vade}
+                #"VaDE": _build_vade,
+                "DKM": _build_dkm}
 
 class DeepClusteringAlgorithm:
         """

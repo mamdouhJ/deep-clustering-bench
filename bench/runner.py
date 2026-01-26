@@ -28,7 +28,8 @@ def main():
     parser.add_argument("--config_number", type=int, required=True, help="Configuration number (line number in the config file)")
     parser.add_argument("--num_runs", type=int, default=5, help="Number of runs to execute with different seeds")
     args = parser.parse_args()
-
+    #create a namespace for debugging
+    #args = argparse.Namespace(did=44666, algo="VaDE", config_number=20, num_runs=5)
     config_file = get_config_file_from_number(args.did, args.algo, args.config_number)
     run_id = config_file["run_id"]
     config = config_file["config"]

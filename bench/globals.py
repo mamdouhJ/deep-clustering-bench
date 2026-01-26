@@ -1,1 +1,1 @@
-ALGOS = ['IDEC', 'DDC', 'DeepECT', 'DipEncoder', 'VaDE']
+ALGOS = ['IDEC', 'DDC', 'DeepECT', 'DipEncoder', 'DKM']

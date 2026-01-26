@@ -8,6 +8,7 @@ ALGO_SPECS = {
     "DDC": "ae",
     "DeepECT": "ae",
     "DipEncoder": "ae",
-    "VaDE": "vae",
+    #"VaDE": "vae",
+    "DKM": "ae",
 }
 EARLY_STOPPING_OPTIONS = [True, False]

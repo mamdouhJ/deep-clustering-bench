@@ -108,9 +108,11 @@ def sample_for_pair(
     """Sample multiple configurations for given dataset and algorithm."""
     configs = []
     count = 0
+    seed_count = 0
     while len(configs) < n_configs:
         try:
-            seed = get_seed(did, algo,count)
+            seed = get_seed(did, algo,seed_count)
+            seed_count += 1
             config = sample_one_config(
                 seed=seed,
                 did=did,
@@ -121,6 +123,7 @@ def sample_for_pair(
             )
             configs.append(config)
             count += 1
+            
         except Exception as e:
             print(f"Warning: Failed to sample config for did={did}, algo={algo}: {e}")
             continue
