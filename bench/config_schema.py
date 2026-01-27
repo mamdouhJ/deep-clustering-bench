@@ -7,7 +7,7 @@ import hashlib
 
 
 # --- Types ---
-AlgoName = Literal["IDEC", "DDC", "DeepECT", "DipEncoder", "DKM"]
+AlgoName = Literal["IDEC", "DDC", "DeepECT", "DipEncoder", "VaDE"]
 NNType = Literal["ae"]  # extend if needed
 
 
@@ -106,8 +106,8 @@ def validate(cfg: DCConfig, algo_specs: dict[str, str] | None = None) -> None:
         raise ValueError("model.arch layers must all be > 0")
     if cfg.model.bottleneck_dim <= 0:
         raise ValueError("model.bottleneck_dim must be > 0")
-    if cfg.algo == "DDC" and cfg.train.early_stopping == True:
-        raise ValueError("DDC does not support early_stopping=True")
+    #if cfg.algo == "DDC" and cfg.train.early_stopping == True:
+    #    raise ValueError("DDC does not support early_stopping=True")
 
     # Common-sense AE/VAE shape rule (optional but very helpful)
     # Bottleneck should usually be smaller than smallest hidden layer.

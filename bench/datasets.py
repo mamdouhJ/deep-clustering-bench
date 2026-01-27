@@ -5,7 +5,7 @@ import os
 import numpy as np
 import openml
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-
+from sklearn.utils import shuffle
 os.environ.setdefault("OPENML_SKIP_PARQUET", "true")
 
 def _map_non_numeric_labels_to_numeric(labels):
@@ -63,6 +63,7 @@ def load_dataset(did,preprocess="minmax"):
     y = y.astype(np.int64)
     save_npz(did, X, y)
     X = preprocess_dataset(X)
+    X, y = shuffle(X, y, random_state=42)
 
     return X, y
 

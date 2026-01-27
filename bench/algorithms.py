@@ -9,8 +9,9 @@ ALGORITHMS = {"IDEC": IDEC,
               "DDC": DDC,
               "DeepECT": DeepECT,
               "DipEncoder": DipEncoder,
-             # "VaDE": VaDE,
-              "DKM": DKM}
+              "VaDE": VaDE,
+              #"DKM": DKM
+              }
 
 def _build_autoencoder(nn_type: str,input_dim: int,arch: list,bottleneck_dim: int,random_state: int):
         """

@@ -2,11 +2,12 @@ import json
 import argparse
 from pathlib import Path
 import numpy as np
+from globals import ALGOS
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 
-ALGOS = ["DDC", "IDEC", "DipEncoder", "VaDE", "DeepECT"]
+
 
 def count_lines(p: Path) -> int:
     with p.open("r") as f:
