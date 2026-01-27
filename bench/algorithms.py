@@ -9,7 +9,7 @@ ALGORITHMS = {"IDEC": IDEC,
               "DDC": DDC,
               "DeepECT": DeepECT,
               "DipEncoder": DipEncoder,
-              "VaDE": VaDE,
+              "VaDE": VaDE
               #"DKM": DKM
               }
 
@@ -126,8 +126,9 @@ BUILDERS = {"IDEC": _build_idec,
                 "DDC": _build_ddc,
                 "DeepECT": _build_ect,
                 "DipEncoder": _build_dipencoder,
-                #"VaDE": _build_vade,
-                "DKM": _build_dkm}
+                "VaDE": _build_vade
+                #"DKM": _build_dkm
+                }
 
 class DeepClusteringAlgorithm:
         """
