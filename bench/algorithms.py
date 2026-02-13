@@ -47,7 +47,8 @@ def _build_idec(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int
         autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         idec = IDEC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
-                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
+                        clustering_optimizer_params={"lr": clustering_lr},
+                        neural_network=autoencoder,random_state=seed,device="cuda:0")
         print(f"The seed for IDEC is: {seed}")
         return idec
 
@@ -62,7 +63,8 @@ def _build_dkm(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
         autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         dkm = DKM(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
-                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
+                        clustering_optimizer_params={"lr": clustering_lr},
+                        neural_network=autoencoder,random_state=seed,device="cuda:0")
         return dkm
 
 def _build_vade(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
@@ -77,7 +79,7 @@ def _build_vade(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int
         vade = VaDE(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,
-                        embedding_size=bottleneck_dim,random_state=seed)
+                        embedding_size=bottleneck_dim,random_state=seed,device="cuda:0")
         return vade
 
 def _build_ddc(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
@@ -90,7 +92,8 @@ def _build_ddc(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
                 raise ValueError("DDC requires an Autoencoder (nn_type='ae').")
         autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         ddc = DDC(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
-                pretrain_optimizer_params={"lr": pretrain_lr},neural_network=autoencoder,random_state=seed)
+                pretrain_optimizer_params={"lr": pretrain_lr},neural_network=autoencoder,
+                random_state=seed,device="cuda:0")
         return ddc
 
 def _build_ect(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
@@ -104,7 +107,8 @@ def _build_ect(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
         autoencoder = _build_autoencoder(nn_type, input_dim, arch, bottleneck_dim,seed)
         deepect = DeepECT(max_n_leaf_nodes=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
-                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,random_state=seed)
+                        clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder,
+                        random_state=seed,device="cuda:0")
         return deepect
 
 def _build_dipencoder(n_clusters: int, input_dim: int, arch: list, bottleneck_dim: int,
@@ -119,7 +123,7 @@ def _build_dipencoder(n_clusters: int, input_dim: int, arch: list, bottleneck_di
         dipencoder = DipEncoder(n_clusters=n_clusters,batch_size=batch_size,pretrain_epochs=pretrain_epochs,
                     clustering_epochs=clustering_epochs,pretrain_optimizer_params={"lr": pretrain_lr},
                         clustering_optimizer_params={"lr": clustering_lr},neural_network=autoencoder
-                        ,embedding_size=bottleneck_dim,random_state=seed)
+                        ,embedding_size=bottleneck_dim,random_state=seed,device="cuda:0")
         return dipencoder
 
 BUILDERS = {"IDEC": _build_idec,
