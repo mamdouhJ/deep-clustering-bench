@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from pathlib import Path
 
-def extract_raw_kmeans_data(results_dir="/home/wiss/aljoud/deep-clustering-bench/results"):
+def extract_raw_kmeans_data(results_dir="./"):
     results_path = Path(results_dir)
     all_data = []
 
