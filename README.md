@@ -26,14 +26,6 @@ It contains 375,000 individual model evaluations across 100 tabular datasets and
 
 ---
 
-## Installation
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
 ## Reproducing the Analysis
 
 After downloading the dataset from Zenodo, update the data path at the top of `insights_and_analysis.ipynb` and run all cells to reproduce the figures in the paper.
