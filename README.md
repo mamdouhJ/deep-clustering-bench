@@ -8,7 +8,7 @@ The repository contains the code used to reproduce all experiments, figures, and
 
 ## Dataset
 
-The meta-dataset is available at the following anonymous Zenodo link: [YOUR_ZENODO_URL]
+The meta-dataset is available at the following anonymous Zenodo link: [[YOUR_ZENODO_URL]](https://zenodo.org/records/20195685)
 
 It contains 375,000 individual model evaluations across 100 tabular datasets and 5 deep clustering algorithms, including ground-truth performance metrics (ARI, NMI, UCA), internal validation proxies (Silhouette, Davies-Bouldin), and full training loss curves.
 
