@@ -35,6 +35,8 @@ bench/failed_tasks_catcher.py
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+/compressed_data.tar.gz 
+/count_experiments.py
 
 # Installer logs
 pip-log.txt

@@ -44,7 +44,11 @@ def main():
     if results_path.exists():
         print(f"[SKIP] Results already exist: {results_path}")
         return
-
+    #skip if there exists 200 results files for the same dataset and algorithm
+    existing_results = list(results_dir.glob(f"result_*.jsonl"))
+    if len(existing_results) >= 200:
+        print(f"[SKIP] Too many existing results for this config: {len(existing_results)} results found in {results_dir}")
+        return
     # 2) Atomic lock to prevent duplicate concurrent runs
     try:
         fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
@@ -67,6 +71,7 @@ def main():
     atexit.register(_cleanup_lock)
 
     # 3) Run
+
     t0 = time.time()
     results_list = []
     artifacts_list = [] 

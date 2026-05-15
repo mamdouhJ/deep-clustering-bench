@@ -9,7 +9,7 @@ and outputs one row per run line with flattened configuration + metric fields.
 """
 
 from __future__ import annotations
-
+import time
 import argparse
 import csv
 import json
@@ -98,7 +98,7 @@ def build_rows(results_dir: Path, configs_dir: Path) -> tuple[list[dict[str, Any
 
     for result_path in sorted(results_dir.glob("*/*/result_*.jsonl")):
         stats["result_files"] += 1
-
+        t0 = time.time()
         try:
             did = int(result_path.parts[-3])
         except (ValueError, IndexError):
@@ -150,6 +150,7 @@ def build_rows(results_dir: Path, configs_dir: Path) -> tuple[list[dict[str, Any
 
             rows.append(row)
             stats["rows_written"] += 1
+            print(f"[TIMING] {result_path} — {len(result_rows)} rows in {time.time()-t0:.2f}s", flush=True)
 
     return rows, stats
 
