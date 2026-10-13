@@ -53,22 +53,6 @@ pip install -r requirements.txt
 
 Download the meta-dataset from Zenodo, set the data path at the top of `insights_and_analysis.ipynb`, and run all cells to reproduce the figures and tables in the paper.
 
----
-
----
-
-## Citation
-
-```bibtex
-@inproceedings{aljoud2026tabulardcbench,
-  title     = {Tabular-DC-Bench: A Large-Scale Meta-Dataset for Hyperparameter
-               Optimization in Deep Clustering},
-  author    = {Aljoud, Mamdouh and Marques Tavares, Gabriel and Gilhuber, Sandra
-               and Leiber, Collin and Seidl, Thomas},
-  booktitle = {International Conference on Automated Machine Learning (AutoML)},
-  year      = {2026}
-}
-```
 
 ---
 
